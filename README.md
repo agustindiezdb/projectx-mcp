@@ -1,3 +1,5 @@
+<img src="src/assets/DBP_Logo_Horizontal.svg" alt="Dualboot Partners" width="200" />
+
 # projectx-mcp
 
 Cargá horas en [ProjectX](https://projectx.dualbootpartners.com) hablándole a Claude.
