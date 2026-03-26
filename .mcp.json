@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "projectx": {
+      "command": "/usr/local/bin/projectx-mcp"
+    }
+  }
+}

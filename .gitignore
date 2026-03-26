@@ -1,0 +1,8 @@
+node_modules/
+dist/
+/auth/
+.env
+*.js.map
+*.pkg
+.pkg-build/
+.pkg-scripts/
