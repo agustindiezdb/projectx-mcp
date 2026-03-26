@@ -2,93 +2,93 @@
 
 # projectx-mcp
 
-Cargá horas en [ProjectX](https://projectx.dualbootpartners.com) hablándole a Claude.
+Log hours in [ProjectX](https://projectx.dualbootpartners.com) by talking to Claude.
 
-> "Cargá 8 horas de Ontrac para hoy"
-> "Completá los días que me faltan esta semana con Ontrac"
-> "¿Qué días no tengo horas cargadas este mes?"
-
----
-
-## Instalación (Mac)
-
-### 1. Descargá el installer
-
-Descargá el archivo `projectx-mcp.pkg` desde [Releases](https://github.com/agustindiezdb/projectx-mcp/releases).
-
-### 2. Instalá
-
-Hacé doble click en el archivo descargado y seguí los pasos del instalador.
-
-### 3. Abrí Claude Desktop
-
-Al abrir Claude Desktop por primera vez, se va a abrir automáticamente una ventana del browser. Iniciá sesión con tu cuenta de Google de Dualboot. El browser se cierra solo cuando termina.
-
-**Listo.** Ya podés pedirle a Claude que cargue tus horas.
+> "Log 8 hours of Ontrac for today"
+> "Fill in the missing days this week with Ontrac"
+> "Which days am I missing hours for this month?"
 
 ---
 
-## Cómo usarlo
+## Installation (Mac)
 
-Hablale a Claude de forma natural:
+### 1. Download the installer
+
+Download `projectx-mcp.pkg` from [Releases](https://github.com/agustindiezdb/projectx-mcp/releases).
+
+### 2. Install
+
+Double-click the downloaded file and follow the installer steps.
+
+### 3. Open Claude Desktop
+
+The first time you open Claude Desktop, a browser window will open automatically. Sign in with your Dualboot Google account. The browser closes on its own when done.
+
+**That's it.** You can now ask Claude to log your hours.
+
+---
+
+## Usage
+
+Just talk to Claude naturally:
 
 ```
-Cargá 8 horas de Ontrac para hoy con descripción "Sprint planning"
+Log 8 hours of Ontrac for today with description "Sprint planning"
 ```
 ```
-Revisá mis entradas de esta semana y completá los días que faltan con 8h de Ontrac
+Check my entries for this week and fill the missing days with 8h of Ontrac
 ```
 ```
-Borrá la entrada de ayer y cargá 4h de Internal — Administrative
+Delete yesterday's entry and log 4h of Internal — Administrative
 ```
 
 ---
 
-## Si el login falla o la sesión expiró
+## If login fails or the session expired
 
-Reiniciá Claude Desktop. El browser se va a abrir de nuevo para que vuelvas a iniciar sesión.
+Restart Claude Desktop. The browser will open again for you to sign in.
 
 ---
 
-## Tools disponibles
+## Available tools
 
-| Tool | Descripción |
+| Tool | Description |
 |------|-------------|
-| `get_time_entries` | Ver entradas en un rango de fechas |
-| `get_projects` | Listar proyectos disponibles |
-| `create_time_entry` | Crear una entrada |
-| `delete_time_entry` | Borrar una entrada por ID |
+| `get_time_entries` | View entries for a date range |
+| `get_projects` | List available projects |
+| `create_time_entry` | Create an entry |
+| `delete_time_entry` | Delete an entry by ID |
 
 ---
 
-## Para desarrolladores
+## For developers
 
-### Arquitectura
+### Architecture
 
 ```
 Claude Desktop → MCP Server (stdio) → fetch() + _interslice_session cookie → ProjectX API
 ```
 
-### Setup desde cero
+### Setup from scratch
 
 ```bash
 npm install
 npm run build
 ```
 
-La sesión se guarda en `~/Library/Application Support/projectx-mcp/auth.json` (gitignored).
+The session is stored at `~/Library/Application Support/projectx-mcp/auth.json` (gitignored).
 
-Al iniciar el servidor, si no hay sesión válida se abre Chrome automáticamente para el login.
+On startup, if no valid session is found, Chrome opens automatically for login.
 
-### Generar el installer
+### Build the installer
 
 ```bash
-npm run build:installer   # genera projectx-mcp.pkg
+npm run build:installer   # generates projectx-mcp.pkg
 ```
 
-El `.pkg` instala la app en `/usr/local/lib/projectx-mcp/` y escribe automáticamente el config de Claude Desktop.
+The `.pkg` installs the app to `/usr/local/lib/projectx-mcp/` and automatically writes the Claude Desktop config.
 
-### Testear la API directamente
+### Test the API directly
 
 ```bash
 npm run test:entry
@@ -110,7 +110,7 @@ npm run test:entry
 
 ### Troubleshooting
 
-- **Session expired** → reiniciá Claude Desktop, el browser se abre solo
-- **Chrome not found** → instalá Google Chrome
-- **Project not found** → pedile a Claude `get_projects` para ver los nombres exactos
-- **post-install no escribió el config** → editá manualmente el JSON de arriba
+- **Session expired** → restart Claude Desktop, the browser opens automatically
+- **Chrome not found** → install Google Chrome
+- **Project not found** → ask Claude to run `get_projects` to see exact names
+- **post-install didn't write the config** → manually edit the JSON above
