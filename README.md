@@ -1,143 +1,114 @@
 # projectx-mcp
 
-MCP server that lets Claude create time entries in [ProjectX](https://projectx.dualbootpartners.com) via Playwright browser automation.
+Cargá horas en [ProjectX](https://projectx.dualbootpartners.com) hablándole a Claude.
 
-## Architecture
+> "Cargá 8 horas de Ontrac para hoy"
+> "Completá los días que me faltan esta semana con Ontrac"
+> "¿Qué días no tengo horas cargadas este mes?"
+
+---
+
+## Instalación (Mac)
+
+### 1. Descargá el installer
+
+Descargá el archivo `projectx-mcp.pkg` desde [Releases](https://github.com/agustindiezdb/projectx-mcp/releases).
+
+### 2. Instalá
+
+Hacé doble click en el archivo descargado y seguí los pasos del instalador.
+
+### 3. Abrí Claude Desktop
+
+Al abrir Claude Desktop por primera vez, se va a abrir automáticamente una ventana del browser. Iniciá sesión con tu cuenta de Google de Dualboot. El browser se cierra solo cuando termina.
+
+**Listo.** Ya podés pedirle a Claude que cargue tus horas.
+
+---
+
+## Cómo usarlo
+
+Hablale a Claude de forma natural:
 
 ```
-Claude → MCP Server (stdio) → Playwright (Chromium) → ProjectX UI
+Cargá 8 horas de Ontrac para hoy con descripción "Sprint planning"
+```
+```
+Revisá mis entradas de esta semana y completá los días que faltan con 8h de Ontrac
+```
+```
+Borrá la entrada de ayer y cargá 4h de Internal — Administrative
 ```
 
-## Prerequisites
+---
 
-- Node.js 18+
-- npm
+## Si el login falla o la sesión expiró
 
-## Install
+Reiniciá Claude Desktop. El browser se va a abrir de nuevo para que vuelvas a iniciar sesión.
+
+---
+
+## Tools disponibles
+
+| Tool | Descripción |
+|------|-------------|
+| `get_time_entries` | Ver entradas en un rango de fechas |
+| `get_projects` | Listar proyectos disponibles |
+| `create_time_entry` | Crear una entrada |
+| `delete_time_entry` | Borrar una entrada por ID |
+
+---
+
+## Para desarrolladores
+
+### Arquitectura
+
+```
+Claude Desktop → MCP Server (stdio) → fetch() + _interslice_session cookie → ProjectX API
+```
+
+### Setup desde cero
 
 ```bash
 npm install
-npx playwright install chromium
-```
-
-## Step 1 — Generate auth.json
-
-You need to log in once so Playwright can save your Google OAuth session:
-
-```bash
-npm run save-session
-```
-
-1. A visible Chromium window opens at ProjectX.
-2. Log in using your Google account.
-3. Once the dashboard is visible, go back to the terminal and press **Enter**.
-4. Your session is saved to `auth/auth.json`.
-
-> `auth/auth.json` is git-ignored. Never commit it.
-
-## Step 2 — Build
-
-```bash
 npm run build
 ```
 
-## Step 3 — Configure Claude Desktop
+La sesión se guarda en `~/Library/Application Support/projectx-mcp/auth.json` (gitignored).
 
-Add the server to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+Al iniciar el servidor, si no hay sesión válida se abre Chrome automáticamente para el login.
 
-```json
-{
-  "mcpServers": {
-    "projectx": {
-      "command": "node",
-      "args": ["/absolute/path/to/projectx-mcp/dist/server.js"],
-      "env": {
-        "HEADLESS": "true"
-      }
-    }
-  }
-}
+### Generar el installer
+
+```bash
+npm run build:installer   # genera projectx-mcp.pkg
 ```
 
-Or with `ts-node` (no build needed):
+El `.pkg` instala la app en `/usr/local/lib/projectx-mcp/` y escribe automáticamente el config de Claude Desktop.
 
-```json
-{
-  "mcpServers": {
-    "projectx": {
-      "command": "npx",
-      "args": ["ts-node", "/absolute/path/to/projectx-mcp/src/server.ts"]
-    }
-  }
-}
-```
-
-Restart Claude Desktop after editing the config.
-
-## Step 4 — Test without MCP
-
-Run the automation directly to verify selectors work:
+### Testear la API directamente
 
 ```bash
 npm run test:entry
 ```
 
-With a visible browser (for debugging):
+### Claude Desktop config (manual)
 
-```bash
-HEADLESS=false npm run test:entry
-```
-
-Edit `scripts/test-entry.ts` to change the test project/date/hours.
-
-## Tool Reference
-
-### `create_time_entry`
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `date` | string | ✅ | Date in `YYYY-MM-DD` format |
-| `hours` | number | ✅ | Hours to log (0.25 increments, max 24) |
-| `project` | string | ✅ | Project name (partial match supported) |
-| `description` | string | ❌ | Notes or description for the entry |
-
-**Returns:**
+`~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
-  "success": true,
-  "message": "Time entry created: 2h on 2024-03-15 for \"ProjectX\" — Fixed bug",
-  "entry": {
-    "date": "2024-03-15",
-    "hours": 2,
-    "project": "ProjectX",
-    "description": "Fixed bug"
+  "mcpServers": {
+    "projectx": {
+      "command": "/usr/local/bin/projectx-mcp"
+    }
   }
 }
 ```
 
-## Example Claude Prompts
+### Troubleshooting
 
-```
-Log 3 hours to the "Acme" project for today with description "Sprint planning"
-```
-
-```
-Add a time entry for 2024-03-15, 1.5 hours, project "Internal", description "Code review"
-```
-
-## Environment Variables
-
-| Variable | Default | Description |
-|---|---|---|
-| `HEADLESS` | `true` | Set to `false` to see the browser |
-
-## Troubleshooting
-
-**`Auth file not found`** — Run `npm run save-session` to generate `auth/auth.json`.
-
-**`Session expired`** — Re-run `npm run save-session` to refresh the session.
-
-**`Could not find "Add entry" button`** — The ProjectX UI may have changed. Run `HEADLESS=false npm run test:entry` to inspect the page and update selectors in `src/automation/projectx.ts`.
-
-**Selector not matching project** — ProjectX project names must match the text in the dropdown. Update `TEST_ENTRY.project` in `scripts/test-entry.ts` to an exact or partial project name you have access to.
+- **Session expired** → reiniciá Claude Desktop, el browser se abre solo
+- **Chrome not found** → instalá Google Chrome
+- **Project not found** → pedile a Claude `get_projects` para ver los nombres exactos
+- **post-install no escribió el config** → editá manualmente el JSON de arriba
