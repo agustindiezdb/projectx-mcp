@@ -2,7 +2,7 @@
 
 # projectx-mcp
 
-Log hours in [ProjectX](https://projectx.dualbootpartners.com) by talking to Claude.
+Log hours in [ProjectX](https://projectx.dualbootpartners.com) by talking to Claude Desktop.
 
 > "Log 8 hours of Ontrac for today"
 > "Fill in the missing days this week with Ontrac"
@@ -10,21 +10,51 @@ Log hours in [ProjectX](https://projectx.dualbootpartners.com) by talking to Cla
 
 ---
 
-## Installation (Mac)
+## Installation
 
-### 1. Download the installer
+### 1. Clone and install
 
-Download `projectx-mcp.pkg` from [Releases](https://github.com/agustindiezdb/projectx-mcp/releases).
+```bash
+git clone git@github.com:agustindiezdb/projectx-mcp.git
+cd projectx-mcp
+npm install
+```
 
-### 2. Install
+### 2. Build
 
-Double-click the downloaded file and follow the installer steps.
+```bash
+npm run build
+```
 
-### 3. Open Claude Desktop
+### 3. Configure Claude Desktop
 
-The first time you open Claude Desktop, a browser window will open automatically. Sign in with your Dualboot Google account. The browser closes on its own when done.
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
-**That's it.** You can now ask Claude to log your hours.
+```json
+{
+  "mcpServers": {
+    "projectx": {
+      "command": "node",
+      "args": [
+        "/ABSOLUTE/PATH/TO/projectx-mcp/dist/src/server.js"
+      ]
+    }
+  }
+}
+```
+
+**Important:** Replace `/ABSOLUTE/PATH/TO/` with the actual full path to your cloned repo.
+
+Example:
+```json
+"/Users/yourname/repos/projectx-mcp/dist/src/server.js"
+```
+
+### 4. Restart Claude Desktop
+
+The first time you open Claude Desktop, Chrome will open automatically. Sign in with your **Dualboot Google account**. The browser closes automatically when authentication is complete.
+
+**That's it!** You can now ask Claude to log your hours.
 
 ---
 
@@ -41,12 +71,9 @@ Check my entries for this week and fill the missing days with 8h of Ontrac
 ```
 Delete yesterday's entry and log 4h of Internal — Administrative
 ```
-
----
-
-## If login fails or the session expired
-
-Restart Claude Desktop. The browser will open again for you to sign in.
+```
+Which days am I missing hours for April?
+```
 
 ---
 
@@ -61,6 +88,29 @@ Restart Claude Desktop. The browser will open again for you to sign in.
 
 ---
 
+## If login fails or the session expires
+
+Simply restart Claude Desktop. Chrome will open again for you to sign in.
+
+---
+
+## Useful scripts
+
+You can also use the API directly without Claude Desktop:
+
+```bash
+# Test the API (creates and deletes a test entry)
+npm run test:entry
+
+# Check which days you're missing hours in April
+npx ts-node scripts/check-april.ts
+
+# Manually refresh your session (if expired)
+npm run save-session
+```
+
+---
+
 ## For developers
 
 ### Architecture
@@ -69,40 +119,35 @@ Restart Claude Desktop. The browser will open again for you to sign in.
 Claude Desktop → MCP Server (stdio) → fetch() + _interslice_session cookie → ProjectX API
 ```
 
-### Setup from scratch
+The session cookie is stored at `~/Library/Application Support/projectx-mcp/auth.json` (gitignored).
+
+On startup, if no valid session is found, Chrome opens automatically for login via Playwright.
+
+### Development mode
 
 ```bash
-npm install
-npm run build
+npm run dev
 ```
 
-The session is stored at `~/Library/Application Support/projectx-mcp/auth.json` (gitignored).
+This runs the server with `ts-node` for rapid development (no build step needed).
 
-On startup, if no valid session is found, Chrome opens automatically for login.
+### How it works
 
-### Build the installer
-
-```bash
-npm run build:installer   # generates projectx-mcp.pkg
-```
-
-The `.pkg` installs the app to `/usr/local/lib/projectx-mcp/` and automatically writes the Claude Desktop config.
-
-### Test the API directly
-
-```bash
-npm run test:entry
-```
+1. **Authentication**: Uses Playwright to open Chrome and auto-detect when login is successful by polling `/api/v1/current_user`
+2. **Session persistence**: Saves cookies to `auth.json` using Playwright's `storageState()`
+3. **API client**: Reads the `_interslice_session` cookie and makes authenticated requests to ProjectX
+4. **MCP protocol**: Exposes 4 tools to Claude Desktop via stdio transport
 
 ### Claude Desktop config (manual)
 
-`~/Library/Application Support/Claude/claude_desktop_config.json`:
+If you prefer to edit manually:
 
 ```json
 {
   "mcpServers": {
     "projectx": {
-      "command": "/usr/local/bin/projectx-mcp"
+      "command": "node",
+      "args": ["/path/to/projectx-mcp/dist/src/server.js"]
     }
   }
 }
@@ -110,7 +155,23 @@ npm run test:entry
 
 ### Troubleshooting
 
-- **Session expired** → restart Claude Desktop, the browser opens automatically
+- **Session expired** → restart Claude Desktop, Chrome opens automatically
 - **Chrome not found** → install Google Chrome
 - **Project not found** → ask Claude to run `get_projects` to see exact names
-- **post-install didn't write the config** → manually edit the JSON above
+- **Path issues** → use absolute paths, not `~` or relative paths
+
+---
+
+## Requirements
+
+- macOS (tested on macOS 14+)
+- Node.js 20+
+- Google Chrome
+- Claude Desktop
+- Dualboot Google account
+
+---
+
+## License
+
+Internal tool for Dualboot Partners.
