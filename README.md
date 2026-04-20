@@ -62,6 +62,28 @@ If you prefer to configure manually:
 
 ---
 
+## Using with Cursor
+
+Cursor uses a **per-project** MCP config. Create `.cursor/mcp.json` in your project root:
+
+```json
+{
+  "$schema": "https://json.schemastore.org/mcp.json",
+  "mcpServers": {
+    "projectx": {
+      "command": "node",
+      "args": ["/ABSOLUTE/PATH/TO/projectx-mcp/dist/src/server.js"]
+    }
+  }
+}
+```
+
+Replace `/ABSOLUTE/PATH/TO/` with the full path to your cloned repo.
+
+Then restart Cursor. The first time, Chrome will open for login.
+
+---
+
 ## Usage
 
 Just talk to Claude naturally:

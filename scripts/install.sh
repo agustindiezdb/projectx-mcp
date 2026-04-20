@@ -72,14 +72,71 @@ fi
 echo "✓ Claude Desktop config updated"
 echo ""
 
-# 4. Done
+# 4. Cursor configuration (optional)
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+read -p "Do you also want to configure Cursor? (y/n) " -n 1 -r
+echo ""
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  read -p "Enter full path to your Cursor project (e.g. ~/repos/myproject): " CURSOR_PROJECT
+  CURSOR_PROJECT="${CURSOR_PROJECT/#\~/$HOME}"
+  
+  if [ ! -d "$CURSOR_PROJECT" ]; then
+    echo "❌ Directory not found: $CURSOR_PROJECT"
+  else
+    CURSOR_CONFIG="$CURSOR_PROJECT/.cursor/mcp.json"
+    mkdir -p "$CURSOR_PROJECT/.cursor"
+    
+    if [ -f "$CURSOR_CONFIG" ]; then
+      # Backup existing
+      cp "$CURSOR_CONFIG" "$CURSOR_CONFIG.backup.$(date +%Y%m%d_%H%M%S)"
+      # Merge with existing config
+      if command -v jq &> /dev/null; then
+        jq --arg path "$SERVER_PATH" '.mcpServers.projectx = {"command": "node", "args": [$path]}' "$CURSOR_CONFIG" > "$CURSOR_CONFIG.tmp"
+        mv "$CURSOR_CONFIG.tmp" "$CURSOR_CONFIG"
+      else
+        python3 -c "
+import json
+with open('$CURSOR_CONFIG', 'r') as f:
+    config = json.load(f)
+if 'mcpServers' not in config:
+    config['mcpServers'] = {}
+config['mcpServers']['projectx'] = {
+    'command': 'node',
+    'args': ['$SERVER_PATH']
+}
+with open('$CURSOR_CONFIG', 'w') as f:
+    json.dump(config, f, indent=2)
+"
+      fi
+    else
+      # Create new config
+      cat > "$CURSOR_CONFIG" << EOF
+{
+  "\$schema": "https://json.schemastore.org/mcp.json",
+  "mcpServers": {
+    "projectx": {
+      "command": "node",
+      "args": ["$SERVER_PATH"]
+    }
+  }
+}
+EOF
+    fi
+    echo "✓ Cursor config updated: $CURSOR_CONFIG"
+  fi
+fi
+echo ""
+
+# 5. Done
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  ✅ Installation complete!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "Next steps:"
-echo "  1. Restart Claude Desktop"
-echo "  2. Chrome will open automatically for login"
-echo "  3. Sign in with your Dualboot Google account"
-echo "  4. Start using: 'Log 8h of Ontrac for today'"
+echo "  • For Claude Desktop: Restart the app"
+echo "  • For Cursor: Restart Cursor or reload the window"
+echo "  • Chrome will open automatically for login"
+echo "  • Sign in with your Dualboot Google account"
+echo "  • Start using: 'Log 8h of Ontrac for today'"
 echo ""
