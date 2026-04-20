@@ -12,49 +12,53 @@ Log hours in [ProjectX](https://projectx.dualbootpartners.com) by talking to Cla
 
 ## Installation
 
-### 1. Clone and install
+### Quick install (automated)
 
 ```bash
 git clone git@github.com:agustindiezdb/projectx-mcp.git
 cd projectx-mcp
-npm install
+bash scripts/install.sh
 ```
 
-### 2. Build
+The script will:
+- Install dependencies
+- Build the project
+- Configure Claude Desktop automatically
+- Create a backup of your existing config
 
-```bash
-npm run build
-```
-
-### 3. Configure Claude Desktop
-
-Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "projectx": {
-      "command": "node",
-      "args": [
-        "/ABSOLUTE/PATH/TO/projectx-mcp/dist/src/server.js"
-      ]
-    }
-  }
-}
-```
-
-**Important:** Replace `/ABSOLUTE/PATH/TO/` with the actual full path to your cloned repo.
-
-Example:
-```json
-"/Users/yourname/repos/projectx-mcp/dist/src/server.js"
-```
-
-### 4. Restart Claude Desktop
-
-The first time you open Claude Desktop, Chrome will open automatically. Sign in with your **Dualboot Google account**. The browser closes automatically when authentication is complete.
+Then **restart Claude Desktop**. Chrome will open automatically for login with your Dualboot Google account.
 
 **That's it!** You can now ask Claude to log your hours.
+
+---
+
+### Manual installation
+
+If you prefer to configure manually:
+
+1. **Clone and build:**
+   ```bash
+   git clone git@github.com:agustindiezdb/projectx-mcp.git
+   cd projectx-mcp
+   npm install
+   npm run build
+   ```
+
+2. **Edit Claude Desktop config:**  
+   Open `~/Library/Application Support/Claude/claude_desktop_config.json` and add:
+   ```json
+   {
+     "mcpServers": {
+       "projectx": {
+         "command": "node",
+         "args": ["/ABSOLUTE/PATH/TO/projectx-mcp/dist/src/server.js"]
+       }
+     }
+   }
+   ```
+   Replace `/ABSOLUTE/PATH/TO/` with the full path to your cloned repo.
+
+3. **Restart Claude Desktop**
 
 ---
 
