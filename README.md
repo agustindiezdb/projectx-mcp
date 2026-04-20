@@ -12,7 +12,7 @@ Log hours in [ProjectX](https://projectx.dualbootpartners.com) by talking to Cla
 
 ## Installation
 
-### Quick install (automated)
+### macOS (automated)
 
 ```bash
 git clone git@github.com:agustindiezdb/projectx-mcp.git
@@ -29,6 +29,37 @@ The script will:
 Then **restart Claude Desktop**. Chrome will open automatically for login with your Dualboot Google account.
 
 **That's it!** You can now ask Claude to log your hours.
+
+---
+
+### Windows
+
+```powershell
+git clone git@github.com:agustindiezdb/projectx-mcp.git
+cd projectx-mcp
+npm install
+npm run build
+```
+
+Then **manually edit Claude Desktop config**:
+
+Open: `%APPDATA%\Claude\claude_desktop_config.json`
+
+Add:
+```json
+{
+  "mcpServers": {
+    "projectx": {
+      "command": "node",
+      "args": ["C:\\full\\path\\to\\projectx-mcp\\dist\\src\\server.js"]
+    }
+  }
+}
+```
+
+Replace `C:\\full\\path\\to\\` with your actual path (use `\\` for Windows paths).
+
+Then **restart Claude Desktop**. Chrome will open automatically for login.
 
 ---
 
@@ -182,19 +213,24 @@ If you prefer to edit manually:
 ### Troubleshooting
 
 - **Session expired** → restart Claude Desktop, Chrome opens automatically
-- **Chrome not found** → install Google Chrome
+- **Chrome not found** → install Google Chrome (must be in system PATH)
 - **Project not found** → ask Claude to run `get_projects` to see exact names
-- **Path issues** → use absolute paths, not `~` or relative paths
+- **Path issues (macOS/Linux)** → use absolute paths, not `~` or relative paths
+- **Path issues (Windows)** → use `\\` (double backslash) in JSON paths, e.g. `C:\\Users\\...`
+- **Auth file location:**
+  - macOS: `~/Library/Application Support/projectx-mcp/auth.json`
+  - Windows: `%APPDATA%\projectx-mcp\auth.json`
+  - Linux: `~/.config/projectx-mcp/auth.json`
 
 ---
 
 ## Requirements
 
-- macOS (tested on macOS 14+)
-- Node.js 20+
-- Google Chrome
-- Claude Desktop
-- Dualboot Google account
+- **OS:** macOS, Windows, or Linux
+- **Node.js:** 20+
+- **Browser:** Google Chrome (required for auto-login)
+- **Claude Desktop**
+- **Dualboot Google account**
 
 ---
 

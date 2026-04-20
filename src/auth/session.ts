@@ -4,13 +4,19 @@ import os from "os";
 import fs from "fs";
 import { getCurrentUser } from "../api/projectx";
 
-export const AUTH_FILE = path.join(
-  os.homedir(),
-  "Library",
-  "Application Support",
-  "projectx-mcp",
-  "auth.json"
-);
+function getAuthDir(): string {
+  if (process.platform === "win32") {
+    const appData = process.env.APPDATA ?? path.join(os.homedir(), "AppData", "Roaming");
+    return path.join(appData, "projectx-mcp");
+  }
+  if (process.platform === "darwin") {
+    return path.join(os.homedir(), "Library", "Application Support", "projectx-mcp");
+  }
+  const xdg = process.env.XDG_CONFIG_HOME ?? path.join(os.homedir(), ".config");
+  return path.join(xdg, "projectx-mcp");
+}
+
+export const AUTH_FILE = path.join(getAuthDir(), "auth.json");
 const LOGIN_URL = "https://projectx.dualbootpartners.com";
 
 export async function hasValidSession(): Promise<boolean> {
